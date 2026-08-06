@@ -32,6 +32,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nexus_os
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nexus_os
       APP_NAME: NEXUS OS
       VERSION: 0.1.0
       AUTHOR: Haseeb
