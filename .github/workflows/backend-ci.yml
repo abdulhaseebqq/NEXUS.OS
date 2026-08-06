@@ -9,6 +9,8 @@ on:
     branches:
       - main
 
+  workflow_dispatch:
+
 jobs:
   backend-tests:
     runs-on: ubuntu-latest
@@ -37,6 +39,7 @@ jobs:
       JWT_SECRET_KEY: nexus_os_super_secret_key_2026
       JWT_ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      REFRESH_TOKEN_EXPIRE_DAYS: 7
       AI_ENGINE: Not Initialized
       DATABASE_NAME: nexus_os
 
@@ -54,26 +57,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Check Formatting (Black)
-        run: |
-          python -m black --check src tests
+      - name: Check Formatting
+        run: python -m black --check src tests
 
-      - name: Check Imports (isort)
-        run: |
-          python -m isort --profile black --check-only src tests
+      - name: Check Imports
+        run: python -m isort --profile black --check-only src tests
 
-      - name: Lint (Flake8)
-        run: |
-          python -m flake8 src tests
+      - name: Lint
+        run: python -m flake8 src tests
 
-      - name: Type Check (MyPy)
-        run: |
-          python -m mypy src
+      - name: Type Check
+        run: python -m mypy src
 
       - name: Run Tests
-        run: |
-          pytest -v
+        run: pytest -v
 
       - name: Build Docker Image
-        run: |
-          docker build -t nexus-os-backend .
+        run: docker build -t nexus-os-backend .
