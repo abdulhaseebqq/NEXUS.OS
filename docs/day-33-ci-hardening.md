@@ -1,24 +1,25 @@
-# Day 33 � CI Hardening & Main Branch Protection
+# Day 33 — CI Hardening & Main Branch Protection
 
 ## Goal
 
 Harden the NEXUS.OS GitHub workflow and establish a professional
-feature-branch ? Pull Request ? CI ? merge workflow.
+feature-branch → Pull Request → CI → merge workflow.
 
 ## Branch Protection
 
 Main branch:
+
 - Restrict deletions
 - Block force pushes
 - Require Pull Request before merging
 - Required approvals: 0
-- Require ackend-tests status check
+- Require `backend-tests` status check
 
 ## CI
 
 Required GitHub Actions check:
 
-ackend-tests
+`backend-tests`
 
 Day 32 CI was already verified successfully before starting Day 33.
 
@@ -26,11 +27,11 @@ Day 32 CI was already verified successfully before starting Day 33.
 
 Feature branch:
 
-eature/day-33-ci-hardening
+`feature/day-33-ci-hardening`
 
 Workflow:
 
-eature branch ? Pull Request ? CI ? main
+`feature branch → Pull Request → CI → main`
 
 ## GitHub Free Limitation
 

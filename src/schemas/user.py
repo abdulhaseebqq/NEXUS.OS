@@ -1,23 +1,41 @@
 from pydantic import BaseModel, EmailStr, Field
 
+PASSWORD_MIN_LENGTH = 8
+PASSWORD_MAX_LENGTH = 128
+
 
 class UserCreate(BaseModel):
-    full_name: str
+    full_name: str = Field(
+        min_length=2,
+        max_length=100,
+    )
     email: EmailStr
-    password: str
+    password: str = Field(
+        min_length=PASSWORD_MIN_LENGTH,
+        max_length=PASSWORD_MAX_LENGTH,
+    )
 
 
 class UserLogin(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(
+        min_length=1,
+        max_length=PASSWORD_MAX_LENGTH,
+    )
 
 
 class RefreshTokenRequest(BaseModel):
-    refresh_token: str
+    refresh_token: str = Field(
+        min_length=1,
+        max_length=4096,
+    )
 
 
 class LogoutRequest(BaseModel):
-    refresh_token: str
+    refresh_token: str = Field(
+        min_length=1,
+        max_length=4096,
+    )
 
 
 class TokenResponse(BaseModel):
@@ -44,10 +62,12 @@ class UserProfileUpdate(BaseModel):
 
 class PasswordChangeRequest(BaseModel):
     current_password: str = Field(
-        min_length=8,
+        min_length=1,
+        max_length=PASSWORD_MAX_LENGTH,
     )
     new_password: str = Field(
-        min_length=8,
+        min_length=PASSWORD_MIN_LENGTH,
+        max_length=PASSWORD_MAX_LENGTH,
     )
 
 
