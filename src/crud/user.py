@@ -1,4 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
+
+from src.core.datetime_utils import utc_now
 from secrets import token_urlsafe
 
 from sqlalchemy.orm import Session
@@ -55,7 +57,7 @@ def create_user(
 ):
     verification_token = generate_secure_token()
 
-    verification_expires_at = datetime.utcnow() + timedelta(
+    verification_expires_at = utc_now() + timedelta(
         hours=EMAIL_VERIFICATION_TOKEN_EXPIRE_HOURS
     )
 
@@ -135,7 +137,7 @@ def create_new_verification_token(
 ):
     user.email_verification_token = generate_secure_token()
 
-    user.email_verification_expires_at = datetime.utcnow() + timedelta(
+    user.email_verification_expires_at = utc_now() + timedelta(
         hours=EMAIL_VERIFICATION_TOKEN_EXPIRE_HOURS
     )
 
@@ -165,7 +167,7 @@ def create_password_reset_token(
 ):
     user.password_reset_token = generate_secure_token()
 
-    user.password_reset_expires_at = datetime.utcnow() + timedelta(
+    user.password_reset_expires_at = utc_now() + timedelta(
         minutes=PASSWORD_RESET_TOKEN_EXPIRE_MINUTES
     )
 

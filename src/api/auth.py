@@ -1,4 +1,4 @@
-from datetime import datetime
+from src.core.datetime_utils import utc_now
 
 from fastapi import (
     APIRouter,
@@ -178,7 +178,7 @@ def verify_email(
             detail="Verification token has no expiry",
         )
 
-    if expires_at < datetime.utcnow():
+    if expires_at < utc_now():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Verification token has expired",
@@ -333,7 +333,7 @@ def reset_password(
             detail="Password reset token has no expiry",
         )
 
-    if expires_at < datetime.utcnow():
+    if expires_at < utc_now():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Password reset token has expired",

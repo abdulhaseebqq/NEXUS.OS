@@ -1,4 +1,4 @@
-from datetime import datetime
+from src.core.datetime_utils import utc_now
 
 from sqlalchemy.orm import Session
 
@@ -63,7 +63,7 @@ def update_session_activity(
     db: Session,
     session: UserSession,
 ):
-    session.last_activity = datetime.utcnow()
+    session.last_activity = utc_now()
 
     db.commit()
     db.refresh(session)
@@ -76,7 +76,7 @@ def close_session(
     session: UserSession,
 ):
     session.is_active = False
-    session.logged_out_at = datetime.utcnow()
+    session.logged_out_at = utc_now()
 
     db.commit()
     db.refresh(session)
@@ -93,7 +93,7 @@ def close_all_active_sessions(
         user_email,
     )
 
-    closed_at = datetime.utcnow()
+    closed_at = utc_now()
 
     for session in sessions:
         session.is_active = False
