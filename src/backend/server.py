@@ -35,6 +35,19 @@ app = FastAPI(
     title=APP_NAME,
     version=VERSION,
     debug=settings.DEBUG,
+    description=(
+        "NEXUS.OS backend API for authentication, user profiles, "
+        "sessions, administration, system management, and platform services."
+    ),
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
+    contact={
+        "name": "NEXUS.OS",
+    },
+    license_info={
+        "name": "Proprietary",
+    },
 )
 
 app.state.limiter = limiter
