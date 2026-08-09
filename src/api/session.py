@@ -4,14 +4,11 @@ from fastapi import (
     HTTPException,
     status,
 )
-from fastapi.security import (
-    HTTPAuthorizationCredentials,
-    HTTPBearer,
-)
+from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
+from src.core.dependencies import bearer_scheme, get_current_active_user
 from src.core.responses import success_response
-from src.core.security import decode_access_token
 from src.crud.activity import create_activity_log
 from src.crud.session import (
     close_all_active_sessions,
@@ -23,43 +20,9 @@ from src.crud.token import (
     is_token_revoked,
     revoke_token,
 )
-from src.crud.user import get_user_by_email
 from src.database.database import get_db
 
 router = APIRouter()
-bearer_scheme = HTTPBearer()
-
-
-def get_authenticated_user(
-    credentials: HTTPAuthorizationCredentials,
-    db: Session,
-):
-    email = decode_access_token(credentials.credentials)
-
-    if email is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired access token",
-        )
-
-    user = get_user_by_email(
-        db,
-        email,
-    )
-
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-        )
-
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is inactive",
-        )
-
-    return user
 
 
 def serialize_session(user_session) -> dict:
@@ -80,7 +43,7 @@ def list_current_user_sessions(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: Session = Depends(get_db),
 ):
-    current_user = get_authenticated_user(
+    current_user = get_current_active_user(
         credentials,
         db,
     )
@@ -101,7 +64,7 @@ def close_all_current_user_sessions(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: Session = Depends(get_db),
 ):
-    current_user = get_authenticated_user(
+    current_user = get_current_active_user(
         credentials,
         db,
     )
@@ -157,7 +120,7 @@ def close_current_user_session(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: Session = Depends(get_db),
 ):
-    current_user = get_authenticated_user(
+    current_user = get_current_active_user(
         credentials,
         db,
     )
