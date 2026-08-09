@@ -1,14 +1,7 @@
-from datetime import datetime
-
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-    Request,
-    status,
-)
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from src.core.datetime_utils import utc_now
 from src.core.rate_limit import limiter
 from src.core.responses import success_response
 from src.core.security import (
@@ -23,10 +16,7 @@ from src.crud.session import (
     get_session_by_refresh_token,
     update_session_activity,
 )
-from src.crud.token import (
-    is_token_revoked,
-    revoke_token,
-)
+from src.crud.token import is_token_revoked, revoke_token
 from src.crud.user import (
     authenticate_user,
     create_new_verification_token,
@@ -39,20 +29,9 @@ from src.crud.user import (
     verify_user_email,
 )
 from src.database.database import get_db
-from src.schemas.reset_password import (
-    ForgotPasswordRequest,
-    ResetPasswordRequest,
-)
-from src.schemas.user import (
-    LogoutRequest,
-    RefreshTokenRequest,
-    UserCreate,
-    UserLogin,
-)
-from src.schemas.verification import (
-    EmailVerificationRequest,
-    ResendVerificationRequest,
-)
+from src.schemas.reset_password import ForgotPasswordRequest, ResetPasswordRequest
+from src.schemas.user import LogoutRequest, RefreshTokenRequest, UserCreate, UserLogin
+from src.schemas.verification import EmailVerificationRequest, ResendVerificationRequest
 
 router = APIRouter()
 
@@ -178,7 +157,7 @@ def verify_email(
             detail="Verification token has no expiry",
         )
 
-    if expires_at < datetime.utcnow():
+    if expires_at < utc_now():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Verification token has expired",
@@ -333,7 +312,7 @@ def reset_password(
             detail="Password reset token has no expiry",
         )
 
-    if expires_at < datetime.utcnow():
+    if expires_at < utc_now():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Password reset token has expired",
