@@ -80,7 +80,7 @@ def test_sessions_access_without_token_is_rejected(client):
 
     assert body["success"] is False
     assert body["message"] == "Not authenticated"
-    assert body["error"]["code"] == "HTTP_ERROR"
+    assert body["error"]["code"] == "UNAUTHORIZED"
 
 
 def test_user_can_list_active_sessions(client):

@@ -131,6 +131,18 @@ async def app_exception_handler(
     )
 
 
+HTTP_ERROR_CODES = {
+    400: "BAD_REQUEST",
+    401: "UNAUTHORIZED",
+    403: "FORBIDDEN",
+    404: "NOT_FOUND",
+    405: "METHOD_NOT_ALLOWED",
+    409: "CONFLICT",
+    413: "PAYLOAD_TOO_LARGE",
+    415: "UNSUPPORTED_MEDIA_TYPE",
+}
+
+
 @app.exception_handler(HTTPException)
 async def http_exception_handler(
     request: Request,
@@ -141,11 +153,16 @@ async def http_exception_handler(
         exc.detail,
     )
 
+    error_code = HTTP_ERROR_CODES.get(
+        exc.status_code,
+        "HTTP_ERROR",
+    )
+
     return JSONResponse(
         status_code=exc.status_code,
         content=error_response(
             message=str(exc.detail),
-            error_code="HTTP_ERROR",
+            error_code=error_code,
         ),
         headers=exc.headers,
     )
