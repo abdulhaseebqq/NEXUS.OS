@@ -2,10 +2,12 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from src.api.admin import router as admin_router
 from src.api.auth import router as auth_router
@@ -19,6 +21,7 @@ from src.core.exceptions import AppException
 from src.core.logger import logger
 from src.core.rate_limit import limiter
 from src.core.responses import error_response
+from src.core.settings import settings
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 UPLOADS_DIRECTORY = PROJECT_ROOT / "uploads"
@@ -28,15 +31,38 @@ UPLOADS_DIRECTORY.mkdir(
     exist_ok=True,
 )
 
-
 app = FastAPI(
     title=APP_NAME,
     version=VERSION,
+    debug=settings.DEBUG,
 )
 
 app.state.limiter = limiter
-app.add_middleware(SlowAPIMiddleware)
 
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=settings.allowed_hosts,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
+    allow_methods=[
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "OPTIONS",
+    ],
+    allow_headers=[
+        "Authorization",
+        "Content-Type",
+    ],
+)
+
+app.add_middleware(SlowAPIMiddleware)
 
 app.mount(
     "/uploads",
@@ -46,7 +72,6 @@ app.mount(
     name="uploads",
 )
 
-
 logger.info("NEXUS OS Backend Started Successfully")
 
 
@@ -55,9 +80,33 @@ async def log_requests(
     request: Request,
     call_next,
 ):
-    logger.info(f"{request.method} {request.url.path}")
+    logger.info(
+        "%s %s",
+        request.method,
+        request.url.path,
+    )
 
     response = await call_next(request)
+
+    return response
+
+
+@app.middleware("http")
+async def add_security_headers(
+    request: Request,
+    call_next,
+):
+    response = await call_next(request)
+
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+
+    if settings.is_production:
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
 
     return response
 
@@ -67,7 +116,10 @@ async def app_exception_handler(
     request: Request,
     exc: AppException,
 ):
-    logger.warning(f"Application Error: {exc.message}")
+    logger.warning(
+        "Application Error: %s",
+        exc.message,
+    )
 
     return JSONResponse(
         status_code=exc.status_code,
@@ -84,7 +136,10 @@ async def http_exception_handler(
     request: Request,
     exc: HTTPException,
 ):
-    logger.warning(f"HTTP Error: {exc.detail}")
+    logger.warning(
+        "HTTP Error: %s",
+        exc.detail,
+    )
 
     return JSONResponse(
         status_code=exc.status_code,
@@ -101,7 +156,10 @@ async def validation_exception_handler(
     request: Request,
     exc: RequestValidationError,
 ):
-    logger.warning(f"Validation Error: {exc.errors()}")
+    logger.warning(
+        "Validation Error: %s",
+        exc.errors(),
+    )
 
     return JSONResponse(
         status_code=422,
@@ -118,7 +176,10 @@ async def rate_limit_exception_handler(
     request: Request,
     exc: RateLimitExceeded,
 ):
-    logger.warning(f"Rate Limit Exceeded: {request.url.path}")
+    logger.warning(
+        "Rate Limit Exceeded: %s",
+        request.url.path,
+    )
 
     return JSONResponse(
         status_code=429,
@@ -134,7 +195,10 @@ async def global_exception_handler(
     request: Request,
     exc: Exception,
 ):
-    logger.error(f"Unhandled Error: {str(exc)}")
+    logger.error(
+        "Unhandled Error: %s",
+        str(exc),
+    )
 
     return JSONResponse(
         status_code=500,
