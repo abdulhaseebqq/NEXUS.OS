@@ -1,7 +1,6 @@
-from src.core.datetime_utils import utc_now
-
 from sqlalchemy.orm import Session
 
+from src.core.datetime_utils import utc_now
 from src.database.models import UserSession
 
 

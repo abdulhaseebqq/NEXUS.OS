@@ -1,10 +1,9 @@
 from datetime import datetime
 
-from src.core.datetime_utils import utc_now
-
 from sqlalchemy import Boolean, DateTime, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
+from src.core.datetime_utils import utc_now
 from src.database.base import Base
 
 

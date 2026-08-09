@@ -1,10 +1,9 @@
 from datetime import timedelta
-
-from src.core.datetime_utils import utc_now
 from secrets import token_urlsafe
 
 from sqlalchemy.orm import Session
 
+from src.core.datetime_utils import utc_now
 from src.core.security import hash_password, verify_password
 from src.database.models import User
 from src.schemas.user import UserCreate
