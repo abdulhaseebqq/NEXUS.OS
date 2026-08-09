@@ -82,7 +82,7 @@ def test_profile_access_without_token_is_rejected(client):
 
     assert body["success"] is False
     assert body["message"] == "Not authenticated"
-    assert body["error"]["code"] == "HTTP_ERROR"
+    assert body["error"]["code"] == "UNAUTHORIZED"
 
 
 def test_verified_user_can_get_profile(client):

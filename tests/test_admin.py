@@ -154,7 +154,7 @@ def test_admin_dashboard_requires_authentication(client):
 
     assert body["success"] is False
     assert body["message"] == "Not authenticated"
-    assert body["error"]["code"] == "HTTP_ERROR"
+    assert body["error"]["code"] == "UNAUTHORIZED"
 
 
 def test_normal_user_cannot_access_admin_dashboard(client):

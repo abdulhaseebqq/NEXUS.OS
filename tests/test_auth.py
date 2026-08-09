@@ -84,7 +84,7 @@ def test_duplicate_signup_is_rejected(client):
 
     assert body["success"] is False
     assert body["message"] == "Email already registered"
-    assert body["error"]["code"] == "HTTP_ERROR"
+    assert body["error"]["code"] == "BAD_REQUEST"
 
 
 def test_unverified_user_cannot_login(client):
