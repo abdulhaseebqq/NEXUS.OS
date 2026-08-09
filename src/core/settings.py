@@ -14,7 +14,8 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0"
     AUTHOR: str = "Haseeb"
 
-    DEBUG: bool = True
+    ENVIRONMENT: str = "development"
+    DEBUG: bool = False
 
     DATABASE_NAME: str = "nexus_os"
     DATABASE_URL: str
@@ -25,6 +26,23 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    ALLOWED_HOSTS: str = "localhost,127.0.0.1,testserver"
+    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
+
+    @property
+    def allowed_hosts(self) -> list[str]:
+        return [host.strip() for host in self.ALLOWED_HOSTS.split(",") if host.strip()]
+
+    @property
+    def cors_origins(self) -> list[str]:
+        return [
+            origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()
+        ]
+
+    @property
+    def is_production(self) -> bool:
+        return self.ENVIRONMENT.lower() == "production"
 
     model_config = SettingsConfigDict(
         env_file=ENV_FILE,
