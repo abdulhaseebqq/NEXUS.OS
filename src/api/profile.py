@@ -9,18 +9,12 @@ from fastapi import (
     UploadFile,
     status,
 )
-from fastapi.security import (
-    HTTPAuthorizationCredentials,
-    HTTPBearer,
-)
+from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
 from src.core.dependencies import bearer_scheme, get_current_active_user
 from src.core.responses import success_response
-from src.core.security import (
-    decode_access_token,
-    verify_password,
-)
+from src.core.security import verify_password
 from src.crud.activity import create_activity_log
 from src.crud.user import (
     change_user_password,

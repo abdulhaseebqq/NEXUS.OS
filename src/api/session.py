@@ -4,15 +4,11 @@ from fastapi import (
     HTTPException,
     status,
 )
-from fastapi.security import (
-    HTTPAuthorizationCredentials,
-    HTTPBearer,
-)
+from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
 from src.core.dependencies import bearer_scheme, get_current_active_user
 from src.core.responses import success_response
-from src.core.security import decode_access_token
 from src.crud.activity import create_activity_log
 from src.crud.session import (
     close_all_active_sessions,
@@ -24,7 +20,6 @@ from src.crud.token import (
     is_token_revoked,
     revoke_token,
 )
-from src.crud.user import get_user_by_email
 from src.database.database import get_db
 
 router = APIRouter()
