@@ -15,6 +15,7 @@ from fastapi.security import (
 )
 from sqlalchemy.orm import Session
 
+from src.core.dependencies import bearer_scheme, get_current_active_user
 from src.core.responses import success_response
 from src.core.security import (
     decode_access_token,
@@ -33,7 +34,6 @@ from src.schemas.user import (
 )
 
 router = APIRouter()
-bearer_scheme = HTTPBearer()
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -53,38 +53,6 @@ ALLOWED_IMAGE_TYPES = {
 MAX_IMAGE_SIZE = 5 * 1024 * 1024
 
 
-def get_authenticated_user(
-    credentials: HTTPAuthorizationCredentials,
-    db: Session,
-):
-    email = decode_access_token(credentials.credentials)
-
-    if email is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired access token",
-        )
-
-    user = get_user_by_email(
-        db,
-        email,
-    )
-
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-        )
-
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is inactive",
-        )
-
-    return user
-
-
 def serialize_user(user) -> dict:
     return {
         "id": user.id,
@@ -102,7 +70,7 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: Session = Depends(get_db),
 ):
-    current_user = get_authenticated_user(
+    current_user = get_current_active_user(
         credentials,
         db,
     )
@@ -119,7 +87,7 @@ def update_current_user_profile(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: Session = Depends(get_db),
 ):
-    current_user = get_authenticated_user(
+    current_user = get_current_active_user(
         credentials,
         db,
     )
@@ -166,7 +134,7 @@ def update_current_user_password(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: Session = Depends(get_db),
 ):
-    current_user = get_authenticated_user(
+    current_user = get_current_active_user(
         credentials,
         db,
     )
@@ -211,7 +179,7 @@ async def upload_profile_image(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: Session = Depends(get_db),
 ):
-    current_user = get_authenticated_user(
+    current_user = get_current_active_user(
         credentials,
         db,
     )
