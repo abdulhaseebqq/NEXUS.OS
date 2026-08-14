@@ -28,7 +28,8 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     ALLOWED_HOSTS: str = "localhost,127.0.0.1,testserver"
-    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
+
+    CORS_ORIGINS: str = "http://localhost:5173," "http://127.0.0.1:5173"
 
     @property
     def allowed_hosts(self) -> list[str]:
