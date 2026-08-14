@@ -3,15 +3,25 @@ import type { FormEvent } from "react"
 import { FaGithub, FaGoogle, FaMicrosoft } from "react-icons/fa"
 import { Link } from "react-router-dom"
 
+import { login } from "../../services/auth"
+import { ApiRequestError } from "../../services/api"
+
 function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState("")
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const [error, setError] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault()
+
     setError("")
+    setSuccessMessage("")
 
     const normalizedEmail = email.trim()
 
@@ -30,14 +40,62 @@ function LoginPage() {
       return
     }
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.")
-      return
-    }
-
     if (password.length > 128) {
       setError("Password must not exceed 128 characters.")
       return
+    }
+
+    try {
+      setIsLoading(true)
+
+      const response = await login({
+        email: normalizedEmail,
+        password,
+      })
+
+      /*
+       * Temporary Day 43 token handling.
+       *
+       * We are intentionally keeping tokens in sessionStorage
+       * instead of localStorage.
+       *
+       * A stronger production token/session strategy can be
+       * introduced later.
+       */
+      sessionStorage.setItem(
+        "nexus_access_token",
+        response.data.access_token,
+      )
+
+      sessionStorage.setItem(
+        "nexus_refresh_token",
+        response.data.refresh_token,
+      )
+
+      sessionStorage.setItem(
+        "nexus_user",
+        JSON.stringify(response.data.user),
+      )
+
+      setSuccessMessage(
+        `Welcome back, ${
+          response.data.user.full_name ??
+          response.data.user.email
+        }.`,
+      )
+
+      setPassword("")
+    } catch (caughtError) {
+      if (caughtError instanceof ApiRequestError) {
+        setError(caughtError.message)
+        return
+      }
+
+      setError(
+        "Unable to connect to NEXUS.OS. Please try again.",
+      )
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -61,10 +119,13 @@ function LoginPage() {
             <input
               type="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) =>
+                setEmail(event.target.value)
+              }
               placeholder="you@example.com"
               autoComplete="email"
               maxLength={254}
+              disabled={isLoading}
             />
           </label>
 
@@ -75,10 +136,13 @@ function LoginPage() {
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={(event) =>
+                  setPassword(event.target.value)
+                }
                 placeholder="Enter your password"
                 autoComplete="current-password"
                 maxLength={128}
+                disabled={isLoading}
               />
 
               <button
@@ -92,6 +156,7 @@ function LoginPage() {
                     ? "Hide password"
                     : "Show password"
                 }
+                disabled={isLoading}
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
@@ -100,13 +165,18 @@ function LoginPage() {
 
           <div className="auth-options">
             <label className="remember-option">
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                disabled={isLoading}
+              />
+
               <span>Remember me</span>
             </label>
 
             <button
               type="button"
               className="forgot-password"
+              disabled={isLoading}
             >
               Forgot password?
             </button>
@@ -118,8 +188,18 @@ function LoginPage() {
             </p>
           )}
 
-          <button className="primary-button" type="submit">
-            Sign in
+          {successMessage && (
+            <p className="form-success" role="status">
+              {successMessage}
+            </p>
+          )}
+
+          <button
+            className="primary-button"
+            type="submit"
+            disabled={isLoading}
+          >
+            {isLoading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
@@ -132,6 +212,7 @@ function LoginPage() {
             type="button"
             className="social-login-button"
             aria-label="Continue with Google"
+            disabled={isLoading}
           >
             <FaGoogle className="social-real-icon google-real-icon" />
             <span>Google</span>
@@ -141,6 +222,7 @@ function LoginPage() {
             type="button"
             className="social-login-button"
             aria-label="Continue with GitHub"
+            disabled={isLoading}
           >
             <FaGithub className="social-real-icon github-real-icon" />
             <span>GitHub</span>
@@ -150,6 +232,7 @@ function LoginPage() {
             type="button"
             className="social-login-button"
             aria-label="Continue with Microsoft"
+            disabled={isLoading}
           >
             <FaMicrosoft className="social-real-icon microsoft-real-icon" />
             <span>Microsoft</span>
