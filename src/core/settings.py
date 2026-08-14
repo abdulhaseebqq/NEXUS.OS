@@ -29,25 +29,16 @@ class Settings(BaseSettings):
 
     ALLOWED_HOSTS: str = "localhost,127.0.0.1,testserver"
 
-    CORS_ORIGINS: str = (
-        "http://localhost:5173,"
-        "http://127.0.0.1:5173"
-    )
+    CORS_ORIGINS: str = "http://localhost:5173," "http://127.0.0.1:5173"
 
     @property
     def allowed_hosts(self) -> list[str]:
-        return [
-            host.strip()
-            for host in self.ALLOWED_HOSTS.split(",")
-            if host.strip()
-        ]
+        return [host.strip() for host in self.ALLOWED_HOSTS.split(",") if host.strip()]
 
     @property
     def cors_origins(self) -> list[str]:
         return [
-            origin.strip()
-            for origin in self.CORS_ORIGINS.split(",")
-            if origin.strip()
+            origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()
         ]
 
     @property
