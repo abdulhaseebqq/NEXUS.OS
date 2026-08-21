@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     DATABASE_NAME: str = "nexus_os"
     DATABASE_URL: str
 
-    AI_ENGINE: str = "Not Initialized"
+    AI_ENGINE: str = "mock"
 
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"
