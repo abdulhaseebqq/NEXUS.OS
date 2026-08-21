@@ -1,19 +1,41 @@
 import { useState } from "react"
 import type { FormEvent } from "react"
-import { FaGithub, FaGoogle, FaMicrosoft } from "react-icons/fa"
-import { Link } from "react-router-dom"
+import {
+  FaGithub,
+  FaGoogle,
+  FaMicrosoft,
+} from "react-icons/fa"
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom"
 
-import { login } from "../../services/auth"
+import { useAuth } from "../../hooks/useAuth"
 import { ApiRequestError } from "../../services/api"
+import {
+  login as loginRequest,
+} from "../../services/auth"
 
 function LoginPage() {
+  const navigate = useNavigate()
+
+  const {
+    login: authenticate,
+  } = useAuth()
+
   const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
+  const [password, setPassword] =
+    useState("")
+
+  const [
+    showPassword,
+    setShowPassword,
+  ] = useState(false)
 
   const [error, setError] = useState("")
-  const [successMessage, setSuccessMessage] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+
+  const [isLoading, setIsLoading] =
+    useState(false)
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -21,17 +43,21 @@ function LoginPage() {
     event.preventDefault()
 
     setError("")
-    setSuccessMessage("")
 
-    const normalizedEmail = email.trim()
+    const normalizedEmail =
+      email.trim()
 
     if (!normalizedEmail) {
       setError("Email is required.")
       return
     }
 
-    if (!normalizedEmail.includes("@")) {
-      setError("Enter a valid email address.")
+    if (
+      !normalizedEmail.includes("@")
+    ) {
+      setError(
+        "Enter a valid email address.",
+      )
       return
     }
 
@@ -41,53 +67,36 @@ function LoginPage() {
     }
 
     if (password.length > 128) {
-      setError("Password must not exceed 128 characters.")
+      setError(
+        "Password must not exceed 128 characters.",
+      )
       return
     }
 
     try {
       setIsLoading(true)
 
-      const response = await login({
-        email: normalizedEmail,
-        password,
-      })
+      const response =
+        await loginRequest({
+          email: normalizedEmail,
+          password,
+        })
 
-      /*
-       * Temporary Day 43 token handling.
-       *
-       * We are intentionally keeping tokens in sessionStorage
-       * instead of localStorage.
-       *
-       * A stronger production token/session strategy can be
-       * introduced later.
-       */
-      sessionStorage.setItem(
-        "nexus_access_token",
-        response.data.access_token,
-      )
-
-      sessionStorage.setItem(
-        "nexus_refresh_token",
-        response.data.refresh_token,
-      )
-
-      sessionStorage.setItem(
-        "nexus_user",
-        JSON.stringify(response.data.user),
-      )
-
-      setSuccessMessage(
-        `Welcome back, ${
-          response.data.user.full_name ??
-          response.data.user.email
-        }.`,
-      )
+      authenticate(response.data)
 
       setPassword("")
+
+      navigate("/dashboard", {
+        replace: true,
+      })
     } catch (caughtError) {
-      if (caughtError instanceof ApiRequestError) {
-        setError(caughtError.message)
+      if (
+        caughtError instanceof
+        ApiRequestError
+      ) {
+        setError(
+          caughtError.message,
+        )
         return
       }
 
@@ -103,7 +112,9 @@ function LoginPage() {
     <main className="auth-page">
       <section className="auth-card">
         <div className="auth-brand">
-          <span className="auth-badge">NEXUS.OS</span>
+          <span className="auth-badge">
+            NEXUS.OS
+          </span>
 
           <h1>Welcome back</h1>
 
@@ -112,7 +123,10 @@ function LoginPage() {
           </p>
         </div>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form
+          className="auth-form"
+          onSubmit={handleSubmit}
+        >
           <label>
             Email
 
@@ -120,7 +134,9 @@ function LoginPage() {
               type="email"
               value={email}
               onChange={(event) =>
-                setEmail(event.target.value)
+                setEmail(
+                  event.target.value,
+                )
               }
               placeholder="you@example.com"
               autoComplete="email"
@@ -134,10 +150,16 @@ function LoginPage() {
 
             <div className="password-field">
               <input
-                type={showPassword ? "text" : "password"}
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
                 value={password}
                 onChange={(event) =>
-                  setPassword(event.target.value)
+                  setPassword(
+                    event.target.value,
+                  )
                 }
                 placeholder="Enter your password"
                 autoComplete="current-password"
@@ -149,7 +171,9 @@ function LoginPage() {
                 type="button"
                 className="password-toggle"
                 onClick={() =>
-                  setShowPassword((value) => !value)
+                  setShowPassword(
+                    (value) => !value,
+                  )
                 }
                 aria-label={
                   showPassword
@@ -158,7 +182,9 @@ function LoginPage() {
                 }
                 disabled={isLoading}
               >
-                {showPassword ? "Hide" : "Show"}
+                {showPassword
+                  ? "Hide"
+                  : "Show"}
               </button>
             </div>
           </label>
@@ -170,7 +196,9 @@ function LoginPage() {
                 disabled={isLoading}
               />
 
-              <span>Remember me</span>
+              <span>
+                Remember me
+              </span>
             </label>
 
             <button
@@ -183,14 +211,11 @@ function LoginPage() {
           </div>
 
           {error && (
-            <p className="form-error" role="alert">
+            <p
+              className="form-error"
+              role="alert"
+            >
               {error}
-            </p>
-          )}
-
-          {successMessage && (
-            <p className="form-success" role="status">
-              {successMessage}
             </p>
           )}
 
@@ -199,12 +224,16 @@ function LoginPage() {
             type="submit"
             disabled={isLoading}
           >
-            {isLoading ? "Signing in..." : "Sign in"}
+            {isLoading
+              ? "Signing in..."
+              : "Sign in"}
           </button>
         </form>
 
         <div className="social-divider">
-          <span>or continue with</span>
+          <span>
+            or continue with
+          </span>
         </div>
 
         <div className="social-login-grid">
@@ -215,6 +244,7 @@ function LoginPage() {
             disabled={isLoading}
           >
             <FaGoogle className="social-real-icon google-real-icon" />
+
             <span>Google</span>
           </button>
 
@@ -225,6 +255,7 @@ function LoginPage() {
             disabled={isLoading}
           >
             <FaGithub className="social-real-icon github-real-icon" />
+
             <span>GitHub</span>
           </button>
 
@@ -235,7 +266,10 @@ function LoginPage() {
             disabled={isLoading}
           >
             <FaMicrosoft className="social-real-icon microsoft-real-icon" />
-            <span>Microsoft</span>
+
+            <span>
+              Microsoft
+            </span>
           </button>
         </div>
 
