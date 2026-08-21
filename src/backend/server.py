@@ -11,6 +11,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from src.api.admin import router as admin_router
 from src.api.auth import router as auth_router
+from src.api.chat import router as chat_router
 from src.api.health import router as health_router
 from src.api.home import router as home_router
 from src.api.profile import router as profile_router
@@ -37,7 +38,8 @@ app = FastAPI(
     debug=settings.DEBUG,
     description=(
         "NEXUS.OS backend API for authentication, user profiles, "
-        "sessions, administration, system management, and platform services."
+        "sessions, administration, system management, AI chat, "
+        "and platform services."
     ),
     docs_url="/docs",
     redoc_url="/redoc",
@@ -273,6 +275,12 @@ app.include_router(
     session_router,
     prefix="/api/v1",
     tags=["Sessions"],
+)
+
+app.include_router(
+    chat_router,
+    prefix="/api/v1",
+    tags=["Chat"],
 )
 
 app.include_router(
